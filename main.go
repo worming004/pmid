@@ -16,6 +16,8 @@ var docStyle = lipgloss.NewStyle().Margin(1, 2)
 var defaultItemAssert list.DefaultItem = item{}
 var itemAssert list.Item = item{}
 
+var podmanCommands = podman.Default
+
 type item struct {
 	title, id string
 }
@@ -50,8 +52,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 		if msg.String() == "d" {
-			index := m.list.Index()
-			m.list.RemoveItem(index)
+			it := m.list.SelectedItem().(item)
+			podmanCommands.DeleteImage(it.id)
+			m.list.SetItems(getList())
 			return m, nil
 		}
 	case tea.WindowSizeMsg:
@@ -72,13 +75,7 @@ func main() {
 	closer := log.SetupDefaultLogger()
 	defer closer.Close()
 
-	podmanImages, err := podman.PodmanCommands{}.GetImages()
-	if err != nil {
-		slog.Error(err.Error())
-	}
-	var items []list.Item = toItems(podmanImages)
-
-	slog.Info(items[0].(item).Title())
+	items := getList()
 
 	// m := model{list: list.New(items, list.NewDefaultDelegate(), 0, 0)}
 	m := model{list: list.New(items, list.NewDefaultDelegate(), 0, 0)}
@@ -90,4 +87,13 @@ func main() {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}
+}
+
+func getList() []list.Item {
+	podmanImages, err := podmanCommands.GetImages()
+	if err != nil {
+		slog.Error(err.Error())
+	}
+	var items []list.Item = toItems(podmanImages)
+	return items
 }

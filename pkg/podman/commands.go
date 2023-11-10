@@ -16,6 +16,8 @@ type Image struct {
 type PodmanCommands struct {
 }
 
+var Default = PodmanCommands{}
+
 func (pc PodmanCommands) GetImages() ([]Image, error) {
 	cmd := exec.Command("podman", "images")
 
@@ -56,4 +58,9 @@ func parseGetImage(reader io.Reader) ([]Image, error) {
 	}
 
 	return result, nil
+}
+
+func (pm PodmanCommands) DeleteImage(id string) error {
+	cmd := exec.Command("podman", "image", "rm", id)
+	return cmd.Run()
 }
