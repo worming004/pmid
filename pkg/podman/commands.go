@@ -11,7 +11,7 @@ import (
 )
 
 type Image struct {
-	name, id string
+	Name, Id string
 }
 type PodmanCommands struct {
 }
@@ -49,8 +49,8 @@ func parseGetImage(reader io.Reader) ([]Image, error) {
 		slog.Debug(t, "length", len(it))
 
 		result = append(result, Image{
-			name: it[0],
-			id:   it[2],
+			Name: it[0],
+			Id:   it[2],
 		})
 
 	}
