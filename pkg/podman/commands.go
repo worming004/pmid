@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"os/exec"
@@ -11,7 +12,7 @@ import (
 )
 
 type Image struct {
-	Name, Id string
+	Name, Id, Tag string
 }
 type PodmanCommands struct {
 }
@@ -52,6 +53,7 @@ func parseGetImage(reader io.Reader) ([]Image, error) {
 
 		result = append(result, Image{
 			Name: it[0],
+			Tag:  it[1],
 			Id:   it[2],
 		})
 
@@ -60,7 +62,15 @@ func parseGetImage(reader io.Reader) ([]Image, error) {
 	return result, nil
 }
 
-func (pm PodmanCommands) DeleteImage(id string) error {
+func (pm PodmanCommands) DeleteImageById(id string) error {
+	slog.Debug("deleting image with id", "id", id)
 	cmd := exec.Command("podman", "image", "rm", id)
+	return cmd.Run()
+}
+
+func (pm PodmanCommands) DeleteImageByTag(repo, tag string) error {
+	fullTag := fmt.Sprintf("%s:%s", repo, tag)
+	slog.Debug("deleting image with tag", "tag", fullTag)
+	cmd := exec.Command("podman", "image", "rm", fullTag)
 	return cmd.Run()
 }

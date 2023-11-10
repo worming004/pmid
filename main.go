@@ -19,11 +19,11 @@ var itemAssert list.Item = item{}
 var podmanCommands = podman.Default
 
 type item struct {
-	title, id string
+	title, id, tag string
 }
 
 func toItem(img podman.Image) item {
-	return item{title: img.Name, id: img.Id}
+	return item{title: img.Name, id: img.Id, tag: img.Tag}
 }
 func toItems(imgs []podman.Image) []list.Item {
 	var result = make([]list.Item, len(imgs))
@@ -53,7 +53,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		if msg.String() == "d" {
 			it := m.list.SelectedItem().(item)
-			podmanCommands.DeleteImage(it.id)
+			err := podmanCommands.DeleteImageById(it.id)
+			if err != nil {
+				slog.Error(err.Error())
+			}
+			m.list.SetItems(getList())
+			return m, nil
+		}
+		if msg.String() == "t" {
+			it := m.list.SelectedItem().(item)
+			err := podmanCommands.DeleteImageByTag(it.title, it.tag)
+			if err != nil {
+				slog.Error(err.Error())
+			}
 			m.list.SetItems(getList())
 			return m, nil
 		}
@@ -79,7 +91,6 @@ func main() {
 
 	// m := model{list: list.New(items, list.NewDefaultDelegate(), 0, 0)}
 	m := model{list: list.New(items, list.NewDefaultDelegate(), 0, 0)}
-	m.list.KeyMap.NextPage.SetKeys("rigth", "l", "pgdown", "f")
 
 	p := tea.NewProgram(m, tea.WithAltScreen())
 
