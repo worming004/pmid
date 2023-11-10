@@ -1,4 +1,4 @@
-module bubblepod
+module github.com/worming004/pmid
 
 go 1.21.3
 

@@ -1,9 +1,9 @@
 package main
 
 import (
-	"bubblepod/pkg/log"
-	"bubblepod/pkg/podman"
 	"fmt"
+	"github.com/worming004/pmid/pkg/log"
+	"github.com/worming004/pmid/pkg/podman"
 	"log/slog"
 )
 
