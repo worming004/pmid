@@ -84,7 +84,8 @@ func (m model) View() string {
 }
 
 func main() {
-	closer := log.SetupDefaultLogger()
+	closer := log.SetupDefaultLogger(false)
+
 	defer closer.Close()
 
 	items := getList()

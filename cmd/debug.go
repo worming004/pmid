@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	closer := log.SetupDefaultLogger()
+	closer := log.SetupDefaultLogger(true)
 	defer closer.Close()
 
 	cmd := podman.PodmanCommands{}
