@@ -1,4 +1,4 @@
-package podman
+package containercmd
 
 import (
 	"bufio"
@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"os"
 	"os/exec"
 	"strings"
 )
@@ -19,8 +20,17 @@ type PodmanCommands struct {
 
 var Default = PodmanCommands{}
 
+var containerRuntime = "podman"
+
+func init() {
+	ctnrun := os.Getenv("PMID_CONTAINER_RUNTIME")
+	if ctnrun != "" {
+		containerRuntime = ctnrun
+	}
+}
+
 func (pc PodmanCommands) GetImages() ([]Image, error) {
-	cmd := exec.Command("podman", "images")
+	cmd := exec.Command(containerRuntime, "images")
 
 	output, err := cmd.Output()
 	if err != nil {
@@ -64,13 +74,13 @@ func parseGetImage(reader io.Reader) ([]Image, error) {
 
 func (pm PodmanCommands) DeleteImageById(id string) error {
 	slog.Debug("deleting image with id", "id", id)
-	cmd := exec.Command("podman", "image", "rm", id)
+	cmd := exec.Command(containerRuntime, "image", "rm", id)
 	return cmd.Run()
 }
 
 func (pm PodmanCommands) DeleteImageByTag(repo, tag string) error {
 	fullTag := fmt.Sprintf("%s:%s", repo, tag)
 	slog.Debug("deleting image with tag", "tag", fullTag)
-	cmd := exec.Command("podman", "image", "rm", fullTag)
+	cmd := exec.Command(containerRuntime, "image", "rm", fullTag)
 	return cmd.Run()
 }

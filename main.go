@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/worming004/pmid/pkg/containercmd"
 	"github.com/worming004/pmid/pkg/log"
-	"github.com/worming004/pmid/pkg/podman"
 	"log/slog"
 	"os"
 
@@ -16,16 +16,16 @@ var docStyle = lipgloss.NewStyle().Margin(1, 2)
 var defaultItemAssert list.DefaultItem = item{}
 var itemAssert list.Item = item{}
 
-var podmanCommands = podman.Default
+var containerCommands = containercmd.Default
 
 type item struct {
 	title, id, tag string
 }
 
-func toItem(img podman.Image) item {
+func toItem(img containercmd.Image) item {
 	return item{title: img.Name, id: img.Id, tag: img.Tag}
 }
-func toItems(imgs []podman.Image) []list.Item {
+func toItems(imgs []containercmd.Image) []list.Item {
 	var result = make([]list.Item, len(imgs))
 	for i, img := range imgs {
 		result[i] = toItem(img)
@@ -53,7 +53,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		if msg.String() == "d" {
 			it := m.list.SelectedItem().(item)
-			err := podmanCommands.DeleteImageById(it.id)
+			err := containerCommands.DeleteImageById(it.id)
 			if err != nil {
 				slog.Error(err.Error())
 			}
@@ -62,7 +62,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		if msg.String() == "t" {
 			it := m.list.SelectedItem().(item)
-			err := podmanCommands.DeleteImageByTag(it.title, it.tag)
+			err := containerCommands.DeleteImageByTag(it.title, it.tag)
 			if err != nil {
 				slog.Error(err.Error())
 			}
@@ -102,10 +102,10 @@ func main() {
 }
 
 func getList() []list.Item {
-	podmanImages, err := podmanCommands.GetImages()
+	containerImages, err := containerCommands.GetImages()
 	if err != nil {
 		slog.Error(err.Error())
 	}
-	var items []list.Item = toItems(podmanImages)
+	var items []list.Item = toItems(containerImages)
 	return items
 }
